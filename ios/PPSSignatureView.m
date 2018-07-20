@@ -252,30 +252,46 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 }
 
 - (UIImage*) reduceImage:(UIImage*)image toSize:(CGSize)newSize {
-	CGSize scaledSize = newSize;
-	float scaleFactor = 1.0;
-	
-	if(image.size.width > image.size.height) {
-		scaleFactor = image.size.width / image.size.height;
-		scaledSize.width = newSize.width;
-		scaledSize.height = newSize.height / scaleFactor;
-	}
-	else {
-		scaleFactor = image.size.height / image.size.width;
-		scaledSize.height = newSize.height;
-		scaledSize.width = newSize.width / scaleFactor;
-	}
-	
-	NSLog(@"%f x %f", scaledSize.width, scaledSize.height);
-	
-	UIGraphicsBeginImageContext(scaledSize);
-	CGRect scaledImageRect = CGRectMake( 0.0, 0.0, scaledSize.width, scaledSize.height );
-	[image drawInRect:scaledImageRect];
-	
-	UIImage* scaledImage = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();
-	
-	return scaledImage;
+//    CGSize scaledSize = newSize;
+//    float scaleFactor = 1.0;
+//
+//    if(image.size.width > image.size.height) {
+//        scaleFactor = image.size.width / image.size.height;
+//        scaledSize.width = newSize.width;
+//        scaledSize.height = newSize.height / scaleFactor;
+//    }
+//    else {
+//        scaleFactor = image.size.height / image.size.width;
+//        scaledSize.height = newSize.height;
+//        scaledSize.width = newSize.width / scaleFactor;
+//    }
+//
+//    NSLog(@"%f x %f", scaledSize.width, scaledSize.height);
+//
+//    UIGraphicsBeginImageContext(scaledSize);
+//    CGRect scaledImageRect = CGRectMake( 0.0, 0.0, scaledSize.width, scaledSize.height );
+//    [image drawInRect:scaledImageRect];
+//
+//    UIImage* scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+//    UIGraphicsEndImageContext();
+//
+//    return scaledImage;
+    
+    CGSize halfSized = CGSizeMake(newSize.width/2, newSize.height/2);
+    
+    CGFloat scaleFactor = MAX(halfSized.width/image.size.width, halfSized.height/image.size.height);
+    CGFloat width = image.size.width * scaleFactor;
+    CGFloat height = image.size.height * scaleFactor;
+    CGRect imageRect = CGRectMake((halfSized.width - width)/2.0f,
+                                  (halfSized.height - height)/2.0f,
+                                  width,
+                                  height);
+    
+    UIGraphicsBeginImageContextWithOptions(halfSized, NO, 0);
+    [image drawInRect:imageRect];
+    UIImage *resizedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return resizedImage;
 }
 
 - (UIImage *)signatureImage
@@ -298,7 +314,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 	if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
 		//signature
 		if (square) {
-			signatureImg = [self reduceImage:snapshot toSize: CGSizeMake(400.0f, 400.0f)];
+			signatureImg = [self reduceImage:snapshot toSize: CGSizeMake(800.0f, 600.0f)];
 		}
 		else {
 			signatureImg = snapshot;
